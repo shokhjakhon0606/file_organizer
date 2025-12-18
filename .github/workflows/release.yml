@@ -1,0 +1,48 @@
+name: Release statically linked binaries
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        target:
+          - x86_64-unknown-linux-musl
+          - aarch64-unknown-linux-musl
+
+    env:
+      BINARY_NAME: file_organizer
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install cross
+        run: cargo install cross --locked
+
+      - name: Build (release)
+        run: cross build --target ${{ matrix.target }} --release
+
+      - name: Package
+        run: |
+          mkdir -p dist
+          cp target/${{ matrix.target }}/release/${BINARY_NAME} dist/
+          tar -czvf ${BINARY_NAME}-${{ matrix.target }}.tar.gz -C dist ${BINARY_NAME}
+
+      - name: Upload to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            *.tar.gz
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
