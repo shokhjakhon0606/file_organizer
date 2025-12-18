@@ -18,7 +18,7 @@ jobs:
           - aarch64-unknown-linux-musl
 
     env:
-      BINARY_NAME: file_organizer
+      BINARY_NAME: gbma_final
 
     steps:
       - name: Checkout
@@ -46,3 +46,4 @@ jobs:
             *.tar.gz
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          
